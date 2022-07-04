@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5560ce2a54bda8f2191ebfd624a607fc, type: 3}
   m_Name: Dungeon_0
   m_EditorClassIdentifier: 
-  weight: 1
+  weight: 5
   data: {fileID: 11400000, guid: c5474400dfe8a3add87e92548890a7d6, type: 2}
   pX: 1
   nX: 1

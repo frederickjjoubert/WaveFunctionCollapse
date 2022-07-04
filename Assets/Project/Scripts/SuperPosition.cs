@@ -9,15 +9,15 @@ namespace Project.Scripts
     {
         public enum CollapseMethod
         {
-            random,
-            weighted
+            Random,
+            Weighted
         }
 
         #region Attributes
 
         public HashSet<Square> Squares;
 
-        private CollapseMethod _collapseMethod = CollapseMethod.random;
+        private CollapseMethod _collapseMethod = CollapseMethod.Weighted;
 
         #endregion Attributes
 
@@ -60,10 +60,10 @@ namespace Project.Scripts
         {
             switch (_collapseMethod)
             {
-                case CollapseMethod.random:
+                case CollapseMethod.Random:
                     CollapseRandom();
                     break;
-                case CollapseMethod.weighted:
+                case CollapseMethod.Weighted:
                     CollapseWeighted();
                     break;
             }

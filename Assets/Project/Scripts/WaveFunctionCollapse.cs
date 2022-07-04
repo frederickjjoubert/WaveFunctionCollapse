@@ -230,9 +230,10 @@ namespace Project.Scripts
         private void Solve()
         {
             Debug.Log("Solve");
-            while (!_wave.IsCollapsed() && !_wave.IsInvalid())
+            bool solveable = true;
+            while (!_wave.IsCollapsed() && solveable)
             {
-                Step();
+                solveable = Step();
             }
 
             Debug.Log("Solve Completed");
@@ -240,38 +241,21 @@ namespace Project.Scripts
             Debug.Log("Wave is Valid: " + !_wave.IsInvalid());
         }
 
-        private void Iterate()
+        private bool Step()
         {
-            Debug.Log("Iterate");
-            if (_wave.IsCollapsed())
-            {
-                Debug.Log("The Wave is Collapsed");
-                return;
-            }
+            bool stepSuccessful = Iterate();
+            _waveVisualizer.DrawWave();
+            return stepSuccessful;
+        }
 
-            if (_wave.IsInvalid())
-            {
-                Debug.Log("The Wave is Invalid");
-                return;
-            }
-
+        private bool Iterate()
+        {
             (int, int) lowestEntropyCoordinates = _wave.GetLowestEntropyCoordinates();
             int x = lowestEntropyCoordinates.Item1;
             int y = lowestEntropyCoordinates.Item2;
-            Debug.Log("Lowest Entropy Coordinates: " + x + ", " + y);
             _wave.Collapse(x, y);
-            bool propogateSuccessful = _wave.Propagate(x, y);
-            if (!propogateSuccessful)
-            {
-                throw new Exception("Propogation Failed, Wave is Invalid");
-            }
-        }
-
-        private void Step()
-        {
-            Debug.Log("Step");
-            Iterate();
-            _waveVisualizer.DrawWave();
+            bool propagateSuccessful = _wave.Propagate(x, y);
+            return propagateSuccessful;
         }
 
         private void Reset()

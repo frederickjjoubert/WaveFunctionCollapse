@@ -236,11 +236,6 @@ namespace Project.Scripts
                 }
             }
 
-            if (constrainedSquares.Count == 0)
-            {
-                Debug.Log("Constrained Squares is Empty!!!");
-            }
-
             return constrainedSquares;
         }
     }

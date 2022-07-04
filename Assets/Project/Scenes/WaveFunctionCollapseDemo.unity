@@ -168,8 +168,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cb4de67d9bb19814a0d1c6e343b32fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _width: 20
-  _height: 20
+  _width: 10
+  _height: 10
   _squareData:
   - {fileID: 11400000, guid: a7cbebd006a29e51cabfd63de28ec1d0, type: 2}
   - {fileID: 11400000, guid: 6744e1b735f0ff5648a9874394cdd01d, type: 2}
