@@ -168,17 +168,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cb4de67d9bb19814a0d1c6e343b32fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 10
-  height: 10
-  squareData:
+  _width: 20
+  _height: 20
+  _squareData:
   - {fileID: 11400000, guid: a7cbebd006a29e51cabfd63de28ec1d0, type: 2}
   - {fileID: 11400000, guid: 6744e1b735f0ff5648a9874394cdd01d, type: 2}
   - {fileID: 11400000, guid: 45c7fc9455ccbd6a5b0aef5bb91fe57d, type: 2}
   - {fileID: 11400000, guid: f6f4a363da2db7d04b8da4759e790f26, type: 2}
   - {fileID: 11400000, guid: d770ffc8e6bf8bfd793524f1e86d1e61, type: 2}
   - {fileID: 11400000, guid: cd83e772d2deecebdb8818997e4b2079, type: 2}
-  allPossibleSquares: []
-  outputTilemap: {fileID: 788171404}
+  _outputTilemap: {fileID: 788171404}
 --- !u!114 &84505533
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -192,6 +191,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tilemap: {fileID: 788171404}
+  unchangedTile: {fileID: 11400000, guid: 986d9cdea75a9e7a5993773eead4b7d4, type: 2}
+  changedTile: {fileID: 11400000, guid: ab4c9599062f507f1b450ea22051b29a, type: 2}
+  errorTile: {fileID: 11400000, guid: 8672931a498be0b3cb5a7dc3f2f6e82c, type: 2}
 --- !u!1 &700424428
 GameObject:
   m_ObjectHideFlags: 0

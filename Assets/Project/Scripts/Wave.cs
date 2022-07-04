@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -5,18 +6,27 @@ namespace Project.Scripts
 {
     public class Wave
     {
+        #region Events
 
-        private int MaxIterations = 1000;
+        public Action OnRequestDraw;
 
-        public SuperPosition[,] superPositions;
+        #endregion Events
+
+        #region Attributes
+
+        public SuperPosition[,] SuperPositions;
+
+        #endregion Attributes
+
+        #region Public Functions
 
         public bool IsCollapsed()
         {
-            for (int i = 0; i < superPositions.GetLength(0); i++)
+            for (int i = 0; i < SuperPositions.GetLength(0); i++)
             {
-                for (int j = 0; j < superPositions.GetLength(1); j++)
+                for (int j = 0; j < SuperPositions.GetLength(1); j++)
                 {
-                    SuperPosition superPosition = superPositions[i, j];
+                    SuperPosition superPosition = SuperPositions[i, j];
                     if (!superPosition.IsCollapsed())
                     {
                         return false;
@@ -29,11 +39,11 @@ namespace Project.Scripts
 
         public bool IsInvalid()
         {
-            for (int i = 0; i < superPositions.GetLength(0); i++)
+            for (int i = 0; i < SuperPositions.GetLength(0); i++)
             {
-                for (int j = 0; j < superPositions.GetLength(1); j++)
+                for (int j = 0; j < SuperPositions.GetLength(1); j++)
                 {
-                    SuperPosition superPosition = superPositions[i, j];
+                    SuperPosition superPosition = SuperPositions[i, j];
                     if (superPosition.IsInvalid())
                     {
                         return true;
@@ -47,90 +57,84 @@ namespace Project.Scripts
         public (int, int) GetLowestEntropyCoordinates()
         {
             float lowestEntropy = float.MaxValue;
-            int x = 0;
-            int y = 0;
-            for (int i = 0; i < superPositions.GetLength(0); i++)
+
+            List<(int, int)> coordinates = new List<(int, int)>();
+
+            for (int i = 0; i < SuperPositions.GetLength(0); i++)
             {
-                for (int j = 0; j < superPositions.GetLength(1); j++)
+                for (int j = 0; j < SuperPositions.GetLength(1); j++)
                 {
-                    SuperPosition superPosition = superPositions[i, j];
+                    SuperPosition superPosition = SuperPositions[i, j];
                     if (superPosition.IsCollapsed()) continue;
-                    if (superPosition.Entropy() < lowestEntropy)
+                    if (superPosition.Entropy() == lowestEntropy)
                     {
+                        coordinates.Add((i, j));
+                    }
+                    else if (superPosition.Entropy() < lowestEntropy)
+                    {
+                        coordinates.Clear();
+                        coordinates.Add((i, j));
                         lowestEntropy = superPosition.Entropy();
-                        x = i;
-                        y = j;
                     }
                 }
             }
 
-            return (x, y);
+            int index = UnityEngine.Random.Range(0, coordinates.Count - 1);
+            return coordinates[index];
         }
 
         public void Collapse(int x, int y)
         {
-            superPositions[x, y].Collapse();
+            SuperPositions[x, y].Collapse();
         }
 
         public bool Propagate(int x, int y)
         {
             Stack<(int, int)> stack = new Stack<(int, int)>();
             stack.Push((x, y));
-            int iMax = superPositions.GetLength(0);
-            int jMax = superPositions.GetLength(1);
-            int iterations = 0;
-            while (stack.Count > 0 && iterations < MaxIterations)
+            int iMax = SuperPositions.GetLength(0);
+            int jMax = SuperPositions.GetLength(1);
+            while (stack.Count > 0)
             {
-                iterations++;
                 (int, int) coordinates = stack.Pop();
                 int i = coordinates.Item1;
                 int j = coordinates.Item2;
-                // Check Each Tile Super Position Possible Neighbors
-                List<Square> squares = superPositions[x, y].squares;
+                HashSet<Square> squares = SuperPositions[i, j].Squares;
                 if (squares.Count == 0) return false;
 
-                List<Square> allValidUpNeighbors = new List<Square>();
-                List<Square> allValidDownNeighbors = new List<Square>();
-                List<Square> allValidLeftNeighbors = new List<Square>();
-                List<Square> allValidRightNeighbors = new List<Square>();
+                HashSet<Square> pYAllValidNeighbors = new HashSet<Square>();
+                HashSet<Square> nYAllValidNeighbors = new HashSet<Square>();
+                HashSet<Square> pXAllValidNeighbors = new HashSet<Square>();
+                HashSet<Square> nXAllValidNeighbors = new HashSet<Square>();
 
                 foreach (Square square in squares)
                 {
                     // Get the Valid Neighbors that are allowed above the current square.
-                    List<Square> validUpNeighbors = square.constrainedNeighbors[Direction.pY];
-                    foreach (Square validNeighbor in validUpNeighbors)
+                    HashSet<Square> pYValidNeighbors = new HashSet<Square>(square.pYValidNeighbors);
+                    foreach (Square validNeighbor in pYValidNeighbors)
                     {
-                        if (!allValidUpNeighbors.Contains(validNeighbor))
-                        {
-                            allValidUpNeighbors.Add(validNeighbor);
-                        }
+                        pYAllValidNeighbors.Add(validNeighbor);
                     }
+
                     // Get the Valid Neighbors that are allowed below the current square.
-                    List<Square> validDownNeighbors = square.constrainedNeighbors[Direction.nY];
+                    HashSet<Square> validDownNeighbors = new HashSet<Square>(square.nYValidNeighbors);
                     foreach (Square validNeighbor in validDownNeighbors)
                     {
-                        if (!allValidDownNeighbors.Contains(validNeighbor))
-                        {
-                            allValidDownNeighbors.Add(validNeighbor);
-                        }
+                        nYAllValidNeighbors.Add(validNeighbor);
                     }
-                    // Get the Valid Neighbors that are allowed to the left of the current square.
-                    List<Square> validLeftNeighbors = square.constrainedNeighbors[Direction.nX];
-                    foreach (Square validNeighbor in validLeftNeighbors)
-                    {
-                        if (!allValidLeftNeighbors.Contains(validNeighbor))
-                        {
-                            allValidLeftNeighbors.Add(validNeighbor);
-                        }
-                    }
+
                     // Get the Valid Neighbors that are allowed to the right of the current square.
-                    List<Square> validRightNeighbors = square.constrainedNeighbors[Direction.pX];
+                    HashSet<Square> validRightNeighbors = new HashSet<Square>(square.pXValidNeighbors);
                     foreach (Square validNeighbor in validRightNeighbors)
                     {
-                        if (!allValidRightNeighbors.Contains(validNeighbor))
-                        {
-                            allValidRightNeighbors.Add(validNeighbor);
-                        }
+                        pXAllValidNeighbors.Add(validNeighbor);
+                    }
+
+                    // Get the Valid Neighbors that are allowed to the left of the current square.
+                    HashSet<Square> validLeftNeighbors = new HashSet<Square>(square.nXValidNeighbors);
+                    foreach (Square validNeighbor in validLeftNeighbors)
+                    {
+                        nXAllValidNeighbors.Add(validNeighbor);
                     }
                 }
 
@@ -140,13 +144,17 @@ namespace Project.Scripts
                     (int, int) neighborsCoordinates = (i, j + 1);
                     int nI = neighborsCoordinates.Item1;
                     int nJ = neighborsCoordinates.Item2;
-                    List<Square> neighboringSquares = superPositions[nI, nJ].squares;
-                    List<Square> constrainedNeighboringSquares = Constrain(allValidUpNeighbors, neighboringSquares);
-                    if (constrainedNeighboringSquares.Count == 0) return false;
-                    if (neighboringSquares.Count != constrainedNeighboringSquares.Count)
+                    HashSet<Square> pYCurrentNeighbors = new HashSet<Square>(SuperPositions[nI, nJ].Squares);
+                    HashSet<Square> pYConstrainedNeighbors = Constrain(pYCurrentNeighbors, pYAllValidNeighbors);
+                    if (pYConstrainedNeighbors.Count == 0) return false; // DEBUG ONLY, THIS SHOULDN'T HAPPEN!!!
+                    bool setsAreEqual = pYCurrentNeighbors.SetEquals(pYConstrainedNeighbors);
+                    if (!setsAreEqual)
                     {
-                        if (!stack.Contains(neighborsCoordinates)) stack.Push(neighborsCoordinates);
-                        superPositions[nI, nJ].squares = constrainedNeighboringSquares;
+                        SuperPositions[nI, nJ].Squares = pYConstrainedNeighbors;
+                        if (!stack.Contains(neighborsCoordinates))
+                        {
+                            stack.Push(neighborsCoordinates);
+                        }
                     }
                 }
 
@@ -156,13 +164,17 @@ namespace Project.Scripts
                     (int, int) neighborsCoordinates = (i, j - 1);
                     int nI = neighborsCoordinates.Item1;
                     int nJ = neighborsCoordinates.Item2;
-                    List<Square> neighboringSquares = superPositions[nI, nJ].squares;
-                    List<Square> constrainedNeighboringSquares = Constrain(allValidDownNeighbors, neighboringSquares);
-                    if (constrainedNeighboringSquares.Count == 0) return false;
-                    if (neighboringSquares.Count != constrainedNeighboringSquares.Count)
+                    HashSet<Square> nYCurrentNeighbors = new HashSet<Square>(SuperPositions[nI, nJ].Squares);
+                    HashSet<Square> nYConstrainedNeighbors = Constrain(nYCurrentNeighbors, nYAllValidNeighbors);
+                    if (nYConstrainedNeighbors.Count == 0) return false; // DEBUG ONLY, THIS SHOULDN'T HAPPEN!!!
+                    bool setsAreEqual = nYCurrentNeighbors.SetEquals(nYConstrainedNeighbors);
+                    if (!setsAreEqual)
                     {
-                        if (!stack.Contains(neighborsCoordinates)) stack.Push(neighborsCoordinates);
-                        superPositions[nI, nJ].squares = constrainedNeighboringSquares;
+                        SuperPositions[nI, nJ].Squares = nYConstrainedNeighbors;
+                        if (!stack.Contains(neighborsCoordinates))
+                        {
+                            stack.Push(neighborsCoordinates);
+                        }
                     }
                 }
 
@@ -172,13 +184,17 @@ namespace Project.Scripts
                     (int, int) neighborsCoordinates = (i - 1, j);
                     int nI = neighborsCoordinates.Item1;
                     int nJ = neighborsCoordinates.Item2;
-                    List<Square> neighboringSquares = superPositions[nI, nJ].squares;
-                    List<Square> constrainedNeighboringSquares = Constrain(allValidLeftNeighbors, neighboringSquares);
-                    if (constrainedNeighboringSquares.Count == 0) return false;
-                    if (neighboringSquares.Count != constrainedNeighboringSquares.Count)
+                    HashSet<Square> nXCurrentNeighbors = new HashSet<Square>(SuperPositions[nI, nJ].Squares);
+                    HashSet<Square> nXConstrainedNeighbors = Constrain(nXCurrentNeighbors, nXAllValidNeighbors);
+                    if (nXConstrainedNeighbors.Count == 0) return false; // DEBUG ONLY, THIS SHOULDN'T HAPPEN!!!
+                    bool setsAreEqual = nXCurrentNeighbors.SetEquals(nXConstrainedNeighbors);
+                    if (!setsAreEqual)
                     {
-                        if (!stack.Contains(neighborsCoordinates)) stack.Push(neighborsCoordinates);
-                        superPositions[nI, nJ].squares = constrainedNeighboringSquares;
+                        SuperPositions[nI, nJ].Squares = nXConstrainedNeighbors;
+                        if (!stack.Contains(neighborsCoordinates))
+                        {
+                            stack.Push(neighborsCoordinates);
+                        }
                     }
                 }
 
@@ -188,13 +204,17 @@ namespace Project.Scripts
                     (int, int) neighborsCoordinates = (i + 1, j);
                     int nI = neighborsCoordinates.Item1;
                     int nJ = neighborsCoordinates.Item2;
-                    List<Square> neighboringSquares = superPositions[nI, nJ].squares;
-                    List<Square> constrainedNeighboringSquares = Constrain(allValidRightNeighbors, neighboringSquares);
-                    if (constrainedNeighboringSquares.Count == 0) return false;
-                    if (neighboringSquares.Count != constrainedNeighboringSquares.Count)
+                    HashSet<Square> pXCurrentNeighbors = new HashSet<Square>(SuperPositions[nI, nJ].Squares);
+                    HashSet<Square> pXConstrainedNeighbors = Constrain(pXCurrentNeighbors, pXAllValidNeighbors);
+                    if (pXConstrainedNeighbors.Count == 0) return false; // DEBUG ONLY, THIS SHOULDN'T HAPPEN!!!
+                    bool setsAreEqual = pXCurrentNeighbors.SetEquals(pXConstrainedNeighbors);
+                    if (!setsAreEqual)
                     {
-                        if (!stack.Contains(neighborsCoordinates)) stack.Push(neighborsCoordinates);
-                        superPositions[nI, nJ].squares = constrainedNeighboringSquares;
+                        SuperPositions[nI, nJ].Squares = pXConstrainedNeighbors;
+                        if (!stack.Contains(neighborsCoordinates))
+                        {
+                            stack.Push(neighborsCoordinates);
+                        }
                     }
                 }
             }
@@ -202,9 +222,12 @@ namespace Project.Scripts
             return true;
         }
 
-        private List<Square> Constrain(List<Square> validNeighbors, List<Square> currentNeighbors)
+        #endregion Public Functions
+
+
+        private HashSet<Square> Constrain(HashSet<Square> currentNeighbors, HashSet<Square> validNeighbors)
         {
-            List<Square> constrainedSquares = new List<Square>();
+            HashSet<Square> constrainedSquares = new HashSet<Square>();
             foreach (Square neighbor in currentNeighbors)
             {
                 if (validNeighbors.Contains(neighbor))

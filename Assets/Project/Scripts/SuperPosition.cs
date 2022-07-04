@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Random = System.Random;
 
@@ -6,25 +7,34 @@ namespace Project.Scripts
 {
     public class SuperPosition
     {
-
         public enum CollapseMethod
         {
             random,
             weighted
         }
 
+        #region Attributes
+
+        public HashSet<Square> Squares;
+
         private CollapseMethod _collapseMethod = CollapseMethod.random;
 
-        public List<Square> squares;
+        #endregion Attributes
 
-        public SuperPosition(List<Square> squares)
+        #region Constructors
+
+        public SuperPosition(HashSet<Square> squares)
         {
-            this.squares = squares;
+            Squares = squares;
         }
+
+        #endregion Constructors
+
+        #region Public Functions
 
         public int GetCount()
         {
-            return squares.Count;
+            return Squares.Count;
         }
 
         public float Entropy()
@@ -33,17 +43,17 @@ namespace Project.Scripts
             // allowed tile type for the square whose
             // entropy we are calculating.
             // float shannon_entropy_for_square = log(sum(weight)) - (sum(weight * log(weight)) / sum(weight))
-            return squares.Count; // temporary
+            return Squares.Count; // temporary
         }
 
         public bool IsInvalid()
         {
-            return squares.Count == 0;
+            return Squares.Count == 0;
         }
 
         public bool IsCollapsed()
         {
-            return squares.Count == 1;
+            return Squares.Count == 1;
         }
 
         public void Collapse()
@@ -59,38 +69,42 @@ namespace Project.Scripts
             }
         }
 
+        #endregion Public Functions
+
+        #region Private Functions
+
         private void CollapseRandom()
         {
             Square square = GetRandomSquare();
-            squares = new List<Square>();
-            squares.Add(square);
+            Squares = new HashSet<Square> { square };
         }
 
         private void CollapseWeighted()
         {
             Square square = GetWeightedSquare();
-            squares = new List<Square>();
-            squares.Add(square);
+            Squares = new HashSet<Square> { square };
         }
 
         private Square GetRandomSquare()
         {
-            System.Random prng = new Random(System.DateTime.Now.GetHashCode());
-            // return squares[UnityEngine.Random.Range(0, squares.Count)];
-            return squares[prng.Next(0, squares.Count)];
+            Random prng = new Random(System.DateTime.Now.GetHashCode());
+            int randomIndex = prng.Next(0, Squares.Count);
+            return Squares.ElementAt(randomIndex);
         }
+
 
         // I haven't tested this yet, pray for me!
         private Square GetWeightedSquare()
         {
             float totalWeight = 0;
-            foreach (Square square in squares)
+            foreach (Square square in Squares)
             {
                 totalWeight += square.weight;
             }
+
             float randomWeight = UnityEngine.Random.Range(0, totalWeight);
             float currentWeight = 0;
-            foreach (Square square in squares)
+            foreach (Square square in Squares)
             {
                 currentWeight += square.weight;
                 if (currentWeight >= randomWeight)
@@ -98,9 +112,10 @@ namespace Project.Scripts
                     return square;
                 }
             }
+
             return null;
         }
 
-
+        #endregion Private Functions
     }
 }
