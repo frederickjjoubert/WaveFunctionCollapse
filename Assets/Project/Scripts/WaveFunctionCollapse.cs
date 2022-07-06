@@ -12,18 +12,16 @@ namespace Project.Scripts
 
         [SerializeField] private int _width = 10; // x
         [SerializeField] private int _height = 10; // y
-
         [SerializeField] private List<SquareData> _squareData;
-        [SerializeField] private HashSet<Square> _allPossibleSquares; // Debug Only
-
         [SerializeField] private Tilemap _outputTilemap;
 
         private Wave _wave;
         private WaveVisualizer _waveVisualizer;
+        private HashSet<Square> _allPossibleSquares;
 
         #endregion Attributes
 
-        #region Unity Lifecycle
+        #region Unity Event Functions
 
         private void Awake()
         {
@@ -63,7 +61,7 @@ namespace Project.Scripts
             _wave.OnRequestDraw -= HandleDrawRequest;
         }
 
-        #endregion Unity Lifecycle
+        #endregion Unity Event Functions
 
         #region Private Functions
 
@@ -98,22 +96,17 @@ namespace Project.Scripts
         private void ProcessSquareData()
         {
             _allPossibleSquares = new HashSet<Square>();
-            // Create All Squares from SquareData
+            // Create All Possible Squares from SquareData
             foreach (SquareData squareDatum in _squareData)
             {
                 List<Square> newSquares = CreateSquares(squareDatum);
                 _allPossibleSquares.UnionWith(newSquares);
             }
 
-            // Calculate Valid Neighbors for Each Square
+            // Evaluate Possible Neighbors for Each Square to determine Valid Neighbors.
             foreach (Square square in _allPossibleSquares)
             {
-                Dictionary<Direction, HashSet<Square>>
-                    validNeighbors = CalculateValidNeighbors(square, _allPossibleSquares);
-                square.pYValidNeighbors = validNeighbors[Direction.pY];
-                square.nYValidNeighbors = validNeighbors[Direction.nY];
-                square.pXValidNeighbors = validNeighbors[Direction.pX];
-                square.nXValidNeighbors = validNeighbors[Direction.nX];
+                square.EvaluatePossibleNeighbors(_allPossibleSquares);
             }
 
             // DEBUG: Draw out all created squares to visually inspect the rotations look correct.
@@ -134,93 +127,56 @@ namespace Project.Scripts
 
             // Create Base Square
             Square square = new Square();
-            square.data = newSquareData.data;
-            square.weight = newSquareData.weight;
-            square.pXConnector = newSquareData.pX;
-            square.nXConnector = newSquareData.nX;
-            square.pYConnector = newSquareData.pY;
-            square.nYConnector = newSquareData.nY;
-            square.rotation = 0;
+            square.Data = newSquareData.data;
+            square.Weight = newSquareData.weight;
+            square.PxConnector = newSquareData.pX;
+            square.NxConnector = newSquareData.nX;
+            square.PyConnector = newSquareData.pY;
+            square.NyConnector = newSquareData.nY;
+            square.Rotation = 0;
             squares.Add(square);
 
             // Create Rotated Squares
             if (newSquareData.rotate90degrees)
             {
                 Square square90 = new Square();
-                square90.data = newSquareData.data;
-                square90.weight = newSquareData.weight;
-                square90.pXConnector = newSquareData.pY;
-                square90.nXConnector = newSquareData.nY;
-                square90.pYConnector = newSquareData.nX;
-                square90.nYConnector = newSquareData.pX;
-                square90.rotation = -90;
+                square90.Data = newSquareData.data;
+                square90.Weight = newSquareData.weight;
+                square90.PxConnector = newSquareData.pY;
+                square90.NxConnector = newSquareData.nY;
+                square90.PyConnector = newSquareData.nX;
+                square90.NyConnector = newSquareData.pX;
+                square90.Rotation = -90;
                 squares.Add(square90);
             }
 
             if (newSquareData.rotate180degrees)
             {
                 Square square180 = new Square();
-                square180.data = newSquareData.data;
-                square180.weight = newSquareData.weight;
-                square180.pXConnector = newSquareData.nX;
-                square180.nXConnector = newSquareData.pX;
-                square180.pYConnector = newSquareData.nY;
-                square180.nYConnector = newSquareData.pY;
-                square180.rotation = -180;
+                square180.Data = newSquareData.data;
+                square180.Weight = newSquareData.weight;
+                square180.PxConnector = newSquareData.nX;
+                square180.NxConnector = newSquareData.pX;
+                square180.PyConnector = newSquareData.nY;
+                square180.NyConnector = newSquareData.pY;
+                square180.Rotation = -180;
                 squares.Add(square180);
             }
 
             if (newSquareData.rotate270degrees)
             {
                 Square square270 = new Square();
-                square270.data = newSquareData.data;
-                square270.weight = newSquareData.weight;
-                square270.pXConnector = newSquareData.nY;
-                square270.nXConnector = newSquareData.pY;
-                square270.pYConnector = newSquareData.pX;
-                square270.nYConnector = newSquareData.nX;
-                square270.rotation = -270;
+                square270.Data = newSquareData.data;
+                square270.Weight = newSquareData.weight;
+                square270.PxConnector = newSquareData.nY;
+                square270.NxConnector = newSquareData.pY;
+                square270.PyConnector = newSquareData.pX;
+                square270.NyConnector = newSquareData.nX;
+                square270.Rotation = -270;
                 squares.Add(square270);
             }
 
             return squares;
-        }
-
-        public Dictionary<Direction, HashSet<Square>> CalculateValidNeighbors(Square square,
-            HashSet<Square> possibleSquares)
-        {
-            Dictionary<Direction, HashSet<Square>> validNeighbors = new Dictionary<Direction, HashSet<Square>>
-            {
-                { Direction.pX, new HashSet<Square>() },
-                { Direction.nX, new HashSet<Square>() },
-                { Direction.pY, new HashSet<Square>() },
-                { Direction.nY, new HashSet<Square>() }
-            };
-
-            foreach (Square possibleSquare in possibleSquares)
-            {
-                if (square.pXConnector == possibleSquare.nXConnector)
-                {
-                    validNeighbors[Direction.pX].Add(possibleSquare);
-                }
-
-                if (square.nXConnector == possibleSquare.pXConnector)
-                {
-                    validNeighbors[Direction.nX].Add(possibleSquare);
-                }
-
-                if (square.pYConnector == possibleSquare.nYConnector)
-                {
-                    validNeighbors[Direction.pY].Add(possibleSquare);
-                }
-
-                if (square.nYConnector == possibleSquare.pYConnector)
-                {
-                    validNeighbors[Direction.nY].Add(possibleSquare);
-                }
-            }
-
-            return validNeighbors;
         }
 
         #endregion Preprocessing
@@ -238,7 +194,7 @@ namespace Project.Scripts
 
             Debug.Log("Solve Completed");
             Debug.Log("Wave is Collapsed: " + _wave.IsCollapsed());
-            Debug.Log("Wave is Valid: " + !_wave.IsInvalid());
+            Debug.Log("Wave is Valid: " + _wave.IsValid());
         }
 
         private bool Step()

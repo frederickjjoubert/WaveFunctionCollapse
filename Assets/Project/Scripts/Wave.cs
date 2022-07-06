@@ -27,7 +27,7 @@ namespace Project.Scripts
                 for (int j = 0; j < SuperPositions.GetLength(1); j++)
                 {
                     SuperPosition superPosition = SuperPositions[i, j];
-                    if (!superPosition.IsCollapsed())
+                    if (!superPosition.IsCollapsed)
                     {
                         return false;
                     }
@@ -37,21 +37,21 @@ namespace Project.Scripts
             return true;
         }
 
-        public bool IsInvalid()
+        public bool IsValid()
         {
             for (int i = 0; i < SuperPositions.GetLength(0); i++)
             {
                 for (int j = 0; j < SuperPositions.GetLength(1); j++)
                 {
                     SuperPosition superPosition = SuperPositions[i, j];
-                    if (superPosition.IsInvalid())
+                    if (!superPosition.IsValid)
                     {
-                        return true;
+                        return false;
                     }
                 }
             }
 
-            return false;
+            return true;
         }
 
         public (int, int) GetLowestEntropyCoordinates()
@@ -65,16 +65,16 @@ namespace Project.Scripts
                 for (int j = 0; j < SuperPositions.GetLength(1); j++)
                 {
                     SuperPosition superPosition = SuperPositions[i, j];
-                    if (superPosition.IsCollapsed()) continue;
-                    if (superPosition.Entropy() == lowestEntropy)
+                    if (superPosition.IsCollapsed) continue;
+                    if (superPosition.Entropy == lowestEntropy)
                     {
                         coordinates.Add((i, j));
                     }
-                    else if (superPosition.Entropy() < lowestEntropy)
+                    else if (superPosition.Entropy < lowestEntropy)
                     {
                         coordinates.Clear();
                         coordinates.Add((i, j));
-                        lowestEntropy = superPosition.Entropy();
+                        lowestEntropy = superPosition.Entropy;
                     }
                 }
             }
@@ -110,28 +110,28 @@ namespace Project.Scripts
                 foreach (Square square in squares)
                 {
                     // Get the Valid Neighbors that are allowed above the current square.
-                    HashSet<Square> pYValidNeighbors = new HashSet<Square>(square.pYValidNeighbors);
+                    HashSet<Square> pYValidNeighbors = new HashSet<Square>(square.PyValidNeighbors);
                     foreach (Square validNeighbor in pYValidNeighbors)
                     {
                         pYAllValidNeighbors.Add(validNeighbor);
                     }
 
                     // Get the Valid Neighbors that are allowed below the current square.
-                    HashSet<Square> validDownNeighbors = new HashSet<Square>(square.nYValidNeighbors);
+                    HashSet<Square> validDownNeighbors = new HashSet<Square>(square.NyValidNeighbors);
                     foreach (Square validNeighbor in validDownNeighbors)
                     {
                         nYAllValidNeighbors.Add(validNeighbor);
                     }
 
                     // Get the Valid Neighbors that are allowed to the right of the current square.
-                    HashSet<Square> validRightNeighbors = new HashSet<Square>(square.pXValidNeighbors);
+                    HashSet<Square> validRightNeighbors = new HashSet<Square>(square.PxValidNeighbors);
                     foreach (Square validNeighbor in validRightNeighbors)
                     {
                         pXAllValidNeighbors.Add(validNeighbor);
                     }
 
                     // Get the Valid Neighbors that are allowed to the left of the current square.
-                    HashSet<Square> validLeftNeighbors = new HashSet<Square>(square.nXValidNeighbors);
+                    HashSet<Square> validLeftNeighbors = new HashSet<Square>(square.NxValidNeighbors);
                     foreach (Square validNeighbor in validLeftNeighbors)
                     {
                         nXAllValidNeighbors.Add(validNeighbor);

@@ -9,7 +9,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2010ce3f51f9a0282a580215c8461f73, type: 3}
-  m_Name: Tile_L
+  m_Script: {fileID: 11500000, guid: 5560ce2a54bda8f2191ebfd624a607fc, type: 3}
+  m_Name: circuit_square_5
   m_EditorClassIdentifier: 
-  tile: {fileID: 11400000, guid: 449fa8ea60b15875990976e0449aecad, type: 2}
+  weight: 1
+  data: {fileID: 11400000, guid: 59cfc45daf27b0f438ad1f20f2acd331, type: 2}
+  pX: 1
+  nX: 4
+  pY: 4
+  nY: 1
+  rotate90degrees: 1
+  rotate180degrees: 1
+  rotate270degrees: 1

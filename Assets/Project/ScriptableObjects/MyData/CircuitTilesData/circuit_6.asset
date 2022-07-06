@@ -10,6 +10,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2010ce3f51f9a0282a580215c8461f73, type: 3}
-  m_Name: Tile_I
+  m_Name: circuit_6
   m_EditorClassIdentifier: 
-  tile: {fileID: 11400000, guid: 498b2443697316903b6f764a7997d31b, type: 2}
+  tile: {fileID: 11400000, guid: 590fe6a4f4b3bc548a6a323e1d3659c5, type: 2}

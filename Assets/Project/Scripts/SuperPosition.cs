@@ -1,43 +1,84 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 using Random = System.Random;
 
 namespace Project.Scripts
 {
     public class SuperPosition
     {
+        #region Enums
+
         public enum CollapseMethod
         {
             Random,
             Weighted
         }
 
+        #endregion Enums
+
         #region Attributes
 
-        public HashSet<Square> Squares;
+        #region Properties
 
+        public HashSet<Square> Squares
+        {
+            get => _squares;
+            set
+            {
+                _squares = value;
+                UpdateSuperPosition();
+            }
+        }
+
+        public bool IsCollapsed
+        {
+            get => _isCollapsed;
+            private set => _isCollapsed = value;
+        }
+
+        public bool IsValid
+        {
+            get => _isValid;
+            private set => _isValid = value;
+        }
+
+        public float Entropy
+        {
+            get => _entropy;
+            private set => _entropy = value;
+        }
+
+        #endregion Properties
+
+        #region Fields
+
+        private HashSet<Square> _squares;
         private CollapseMethod _collapseMethod = CollapseMethod.Weighted;
+        private bool _isCollapsed = false;
+        private bool _isValid = true;
+        private float _entropy = 0;
+
+        #endregion Fields
 
         #endregion Attributes
 
         #region Constructors
 
-        public SuperPosition(HashSet<Square> squares)
+        public SuperPosition(HashSet<Square> squares, CollapseMethod collapseMethod = CollapseMethod.Weighted)
+
         {
             Squares = squares;
+            _collapseMethod = collapseMethod;
+            UpdateSuperPosition();
         }
 
         #endregion Constructors
 
         #region Public Functions
 
-        public int GetCount()
-        {
-            return Squares.Count;
-        }
-
-        public float Entropy()
+        public float GetEntropy()
         {
             // Sums are over the weights of each remaining
             // allowed tile type for the square whose
@@ -46,12 +87,12 @@ namespace Project.Scripts
             return Squares.Count; // temporary
         }
 
-        public bool IsInvalid()
+        public bool GetIsInvalid()
         {
             return Squares.Count == 0;
         }
 
-        public bool IsCollapsed()
+        public bool GetIsCollapsed()
         {
             return Squares.Count == 1;
         }
@@ -67,6 +108,8 @@ namespace Project.Scripts
                     CollapseWeighted();
                     break;
             }
+
+            UpdateSuperPosition();
         }
 
         #endregion Public Functions
@@ -99,14 +142,14 @@ namespace Project.Scripts
             float totalWeight = 0;
             foreach (Square square in Squares)
             {
-                totalWeight += square.weight;
+                totalWeight += square.Weight;
             }
 
             float randomWeight = UnityEngine.Random.Range(0, totalWeight);
             float currentWeight = 0;
             foreach (Square square in Squares)
             {
-                currentWeight += square.weight;
+                currentWeight += square.Weight;
                 if (currentWeight >= randomWeight)
                 {
                     return square;
@@ -114,6 +157,28 @@ namespace Project.Scripts
             }
 
             return null;
+        }
+
+        private void UpdateEntropy()
+        {
+            _entropy = GetEntropy();
+        }
+
+        private void UpdateIsCollapsed()
+        {
+            _isCollapsed = GetIsCollapsed();
+        }
+
+        private void UpdateIsValid()
+        {
+            _isValid = !GetIsInvalid();
+        }
+
+        private void UpdateSuperPosition()
+        {
+            UpdateEntropy();
+            UpdateIsCollapsed();
+            UpdateIsValid();
         }
 
         #endregion Private Functions

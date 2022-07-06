@@ -33,7 +33,7 @@ namespace Project.Scripts
                     Vector3Int position = new Vector3Int(i, j, 0);
                     Tile tile = GetTile(superPositions[i, j]);
                     tilemap.SetTile(position, tile);
-                    float rotation = superPositions[i, j].Squares.ElementAt(0).rotation;
+                    float rotation = superPositions[i, j].Squares.ElementAt(0).Rotation;
                     tilemap.SetTransformMatrix(position, Matrix4x4.Rotate(Quaternion.Euler(0, 0, rotation)));
                 }
             }
@@ -57,7 +57,7 @@ namespace Project.Scripts
             if (superPosition.Squares.Count == 1)
             {
                 Square square = superPosition.Squares.ElementAt(0);
-                MyData data = square.data;
+                MyData data = square.Data;
                 Tile tile = data.tile;
                 return tile;
             }
