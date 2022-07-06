@@ -16,7 +16,7 @@ MonoBehaviour:
   data: {fileID: 11400000, guid: 59cfc45daf27b0f438ad1f20f2acd331, type: 2}
   pX: 1
   nX: 4
-  pY: 4
+  pY: 5
   nY: 1
   rotate90degrees: 1
   rotate180degrees: 1

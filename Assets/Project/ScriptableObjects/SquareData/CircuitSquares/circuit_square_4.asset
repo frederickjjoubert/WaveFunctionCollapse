@@ -17,7 +17,7 @@ MonoBehaviour:
   pX: 2
   nX: 0
   pY: 4
-  nY: 4
+  nY: 5
   rotate90degrees: 1
   rotate180degrees: 1
   rotate270degrees: 1

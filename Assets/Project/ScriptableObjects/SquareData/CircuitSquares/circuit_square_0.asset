@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5560ce2a54bda8f2191ebfd624a607fc, type: 3}
   m_Name: circuit_square_0
   m_EditorClassIdentifier: 
-  weight: 1
+  weight: 5
   data: {fileID: 11400000, guid: afd9f339162026d4f8ea9a62a89a789d, type: 2}
   pX: 0
   nX: 0
