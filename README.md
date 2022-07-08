@@ -12,4 +12,6 @@ Space - STEP
 
 # Images
 
-![Circuit](./circuit_unity_2.png)
+![Circuit](./Images/circuit_unity_2.png)
+
+![DungeonMaze](./Images/wfc_100x100.png)
